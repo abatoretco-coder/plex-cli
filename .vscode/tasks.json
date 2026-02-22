@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "sectionId",
+      "type": "promptString",
+      "description": "Plex section id (ex: 1)",
+      "default": "1"
+    },
+    {
+      "id": "path",
+      "type": "promptString",
+      "description": "Absolute path to refresh (ex: /srv/media/Movies)",
+      "default": "/srv/media"
+    },
+    {
+      "id": "lines",
+      "type": "promptString",
+      "description": "Number of log lines",
+      "default": "200"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "Plex: List sections",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/plexctl.py", "sections"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Plex: Refresh section",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/plexctl.py",
+        "refresh",
+        "--section",
+        "${input:sectionId}"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Plex: Refresh section (force)",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/plexctl.py",
+        "refresh",
+        "--section",
+        "${input:sectionId}",
+        "--force"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Plex: Refresh path in section",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/plexctl.py",
+        "refresh",
+        "--section",
+        "${input:sectionId}",
+        "--path",
+        "${input:path}"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Plex: Logs",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/plexctl.py",
+        "logs",
+        "-n",
+        "${input:lines}"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Plex: Restart container",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/plexctl.py", "restart"],
+      "problemMatcher": []
+    }
+  ]
+}
