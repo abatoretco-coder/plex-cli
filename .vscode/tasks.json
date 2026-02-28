@@ -54,6 +54,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Plex: Scan all libraries",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/plexctl.py", "refresh-all"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Plex: Scan all libraries (force)",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/plexctl.py", "refresh-all", "--force"],
+      "problemMatcher": []
+    },
+    {
       "label": "Plex: Refresh path in section",
       "type": "shell",
       "command": "python3",

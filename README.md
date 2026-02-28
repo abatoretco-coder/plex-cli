@@ -53,6 +53,13 @@ python3 plexctl.py refresh --section 1
 python3 plexctl.py refresh --section 1 --force
 ```
 
+Rafraîchir toutes les libraries (scan complet):
+
+```bash
+python3 plexctl.py refresh-all
+python3 plexctl.py refresh-all --force
+```
+
 Rafraîchir un chemin précis (après un download, par ex.):
 
 ```bash

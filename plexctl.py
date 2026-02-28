@@ -193,6 +193,50 @@ def cmd_refresh(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_refresh_all(args: argparse.Namespace) -> int:
+    base_url = get_env("PLEX_BASE_URL", DEFAULT_BASE_URL)
+    token = require_env("PLEX_TOKEN")
+
+    sections_url = build_plex_url(base_url, "/library/sections", {"X-Plex-Token": token})
+    status, body = http_get(sections_url)
+    if status < 200 or status >= 300:
+        die(f"Plex returned HTTP {status} for {mask_token_in_url(sections_url)}")
+
+    sections = parse_sections_xml(body)
+    if not sections:
+        die(
+            "No Plex sections found. Create Libraries first in Plex Web UI, then retry.",
+            exit_code=3,
+        )
+
+    any_failed = False
+    for section in sections:
+        section_id = str(section["id"])
+
+        params: dict[str, str] = {"X-Plex-Token": token}
+        if args.force:
+            params["force"] = "1"
+
+        url = build_plex_url(base_url, f"/library/sections/{section_id}/refresh", params)
+        status, _ = http_get(url)
+        safe_url = mask_token_in_url(url)
+
+        title = section.get("title", "")
+        section_type = section.get("type", "")
+        label = f"{section_id} ({section_type}) {title}".strip()
+
+        if status < 200 or status >= 300:
+            any_failed = True
+            _eprint(f"FAILED: {label} (HTTP {status})")
+            _eprint(f"URL: {safe_url}")
+            continue
+
+        print(f"OK: {label} (HTTP {status})")
+        print(f"URL: {safe_url}")
+
+    return 1 if any_failed else 0
+
+
 def _require_docker() -> str:
     docker_path = shutil.which("docker")
     if not docker_path:
@@ -283,6 +327,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_refresh.add_argument("--force", action="store_true", help="Force refresh (force=1)")
     p_refresh.add_argument("--path", help="Absolute folder path to refresh (path=...)")
     p_refresh.set_defaults(func=cmd_refresh)
+
+    p_refresh_all = sub.add_parser("refresh-all", help="Refresh all Plex sections (scan all libraries)")
+    p_refresh_all.add_argument("--force", action="store_true", help="Force refresh (force=1)")
+    p_refresh_all.set_defaults(func=cmd_refresh_all)
 
     p_logs = sub.add_parser("logs", help="Show Plex container logs")
     p_logs.add_argument("-n", default=200, help="Number of log lines (default: 200)")
